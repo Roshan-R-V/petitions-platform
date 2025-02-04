@@ -107,9 +107,6 @@ The Petition Management System is a full-stack web application that allows users
 4. Push to your branch (`git push origin feature-xyz`)
 5. Create a Pull Request
 
-## License
-This project is licensed under the MIT License.
-
 ## Contact
-For queries, contact `your-email@example.com`. Contributions and feedback are welcome!
+For queries, contact `roshanvivek2000@gmail.com`. Contributions and feedback are welcome!
 
