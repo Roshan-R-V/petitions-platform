@@ -1,0 +1,67 @@
+/* Dashboard.css */
+
+/* Color Palette */
+:root {
+    --primary-color: #4A90E2;
+    --secondary-color: #50E3C2;
+    --background-color: #F7F9FC;
+    --text-color: #333333;
+    --accent-color: #F5A623;
+}
+
+/* General Styling */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-container {
+    background-color: var(--background-color);
+    min-height: 100vh;
+    min-width:100%;
+    padding: 20px 0;
+}
+
+.dashboard-title {
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    cursor: pointer;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #e9f7fd;
+}
+
+.dashboard-table-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Badge Styling */
+.badge.bg-primary {
+    background-color: var(--primary-color);
+}
+
+.badge.bg-secondary {
+    background-color: #B0BEC5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-title {
+        font-size: 1.5rem;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+}

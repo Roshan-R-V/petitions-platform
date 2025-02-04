@@ -1,0 +1,72 @@
+/* custom.css */
+
+:root {
+  --primary-green: #00563F; /* Castleton Green */
+  --light-green: #4B8F77; /* Light shade of Castleton Green */
+  --white: #FFFFFF;
+  --gray: #F8F9FA; /* Bootstrap's light gray */
+}
+
+body {
+  background-color: var(--gray);
+  color: var(--primary-green);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--primary-green);
+}
+
+.btn-primary {
+  background-color: var(--primary-green);
+  border-color: var(--primary-green);
+}
+
+.btn-primary:hover {
+  background-color: var(--light-green);
+  border-color: var(--light-green);
+}
+
+.card {
+  border: 1px solid var(--primary-green);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card h5 {
+  color: var(--light-green);
+}
+
+.navbar {
+  background-color: var(--primary-green);
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .nav-link {
+  color: var(--white);
+}
+
+.navbar-dark .nav-link:hover {
+  color: var(--light-green);
+}
+
+.table thead th {
+  background-color: var(--primary-green);
+  color: var(--white);
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--light-green);
+  color: var(--white);
+}
+
+.list-group-item {
+  border-left: 5px solid var(--primary-green);
+}
+
+#heading{
+  color: #00563F;
+}
+
+#button{
+  background-color: #00563F;
+  color: #FFFFFF;
+}
