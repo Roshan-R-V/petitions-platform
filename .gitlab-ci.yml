@@ -1,0 +1,123 @@
+stages:
+  - test
+  - build
+  - docker
+  - scan
+
+# ----------------------------
+# Backend: Maven build & tests
+# ----------------------------
+backend:test:
+  stage: test
+  image: maven:3.9.9-eclipse-temurin-17
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  cache:
+    key:
+      files: [backend/pom.xml]
+    paths:
+      - .m2/repository
+  before_script:
+    - cd backend
+  script:
+    - mvn -B -DskipTests=false verify
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - backend/**/surefire-reports/*.xml
+        - backend/**/failsafe-reports/*.xml
+    paths:
+      - backend/target/*.jar
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+# ----------------------------
+# Frontend: npm build (& tests)
+# ----------------------------
+frontend:build:
+  stage: build
+  image: node:20
+  cache:
+    key:
+      files: [frontend/package-lock.json]
+    paths:
+      - frontend/node_modules
+  before_script:
+    - cd frontend
+  script:
+    - npm ci
+    - npm run test --if-present -- --ci --watch=false
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/build
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+  needs: ["backend:test"]
+
+# --------------------------------------------------
+# OPTIONAL: Build & push Docker images to GitLab CR
+# --------------------------------------------------
+# Requires project Container Registry enabled (Settings ▸ Packages & registries ▸ Container Registry)
+# and shared runners that support docker:dind. GitLab exposes CI_REGISTRY_* variables for login.
+docker:build-backend:
+  stage: docker
+  image: docker:26
+  services:
+    - name: docker:26-dind
+      alias: docker
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""   # disable TLS for dind in CI
+    REGISTRY_IMAGE_BACKEND: "$CI_REGISTRY_IMAGE/backend"
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -f backend/Dockerfile -t "$REGISTRY_IMAGE_BACKEND:$CI_COMMIT_SHORT_SHA" backend
+    - docker push "$REGISTRY_IMAGE_BACKEND:$CI_COMMIT_SHORT_SHA"
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        docker tag "$REGISTRY_IMAGE_BACKEND:$CI_COMMIT_SHORT_SHA" "$REGISTRY_IMAGE_BACKEND:latest"
+        docker push "$REGISTRY_IMAGE_BACKEND:latest"
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  needs: ["backend:test"]
+
+docker:build-frontend:
+  stage: docker
+  image: docker:26
+  services:
+    - name: docker:26-dind
+      alias: docker
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+    REGISTRY_IMAGE_FRONTEND: "$CI_REGISTRY_IMAGE/frontend"
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -f frontend/Dockerfile -t "$REGISTRY_IMAGE_FRONTEND:$CI_COMMIT_SHORT_SHA" frontend
+    - docker push "$REGISTRY_IMAGE_FRONTEND:$CI_COMMIT_SHORT_SHA"
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        docker tag "$REGISTRY_IMAGE_FRONTEND:$CI_COMMIT_SHORT_SHA" "$REGISTRY_IMAGE_FRONTEND:latest"
+        docker push "$REGISTRY_IMAGE_FRONTEND:latest"
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  needs: ["frontend:build"]
+
+# -----------------------------------------
+# OPTIONAL: Security scans (easy to enable)
+# -----------------------------------------
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
