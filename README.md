@@ -37,13 +37,13 @@ The Petition Management System is a full-stack web application that allows users
 1. Clone the repository:
    ```sh
    git clone https://github.com/your-repo/petition-management.git
-   cd petition-management/backend
+   cd petition-management/server
    ```
 2. Configure database settings in `application.properties`:
    ```properties
    spring.datasource.url=jdbc:mysql://localhost:3306/petition_db
    spring.datasource.username=root
-   spring.datasource.password=yourpassword
+   spring.datasource.password=root
    ```
 3. Build and run the backend:
    ```sh
@@ -52,9 +52,9 @@ The Petition Management System is a full-stack web application that allows users
    ```
 
 ### Frontend Setup
-1. Navigate to the frontend folder:
+1. Navigate to the client folder:
    ```sh
-   cd ../frontend
+   cd ../client
    ```
 2. Install dependencies:
    ```sh
