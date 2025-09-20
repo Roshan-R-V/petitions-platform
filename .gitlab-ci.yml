@@ -14,21 +14,21 @@ backend:test:
     MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   cache:
     key:
-      files: [backend/pom.xml]
+      files: [server/pom.xml]
     paths:
       - .m2/repository
   before_script:
-    - cd backend
+    - cd server
   script:
     - mvn -B -DskipTests=false verify
   artifacts:
     when: always
     reports:
       junit:
-        - backend/**/surefire-reports/*.xml
-        - backend/**/failsafe-reports/*.xml
+        - server/**/surefire-reports/*.xml
+        - server/**/failsafe-reports/*.xml
     paths:
-      - backend/target/*.jar
+      - server/target/*.jar
     expire_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -42,18 +42,18 @@ frontend:build:
   image: node:20
   cache:
     key:
-      files: [frontend/package-lock.json]
+      files: [client/package-lock.json]
     paths:
-      - frontend/node_modules
+      - client/node_modules
   before_script:
-    - cd frontend
+    - cd client
   script:
     - npm ci
     - npm run test --if-present -- --ci --watch=false
     - npm run build
   artifacts:
     paths:
-      - frontend/build
+      - client/build
     expire_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -79,7 +79,7 @@ docker:build-backend:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
-    - docker build -f backend/Dockerfile -t "$REGISTRY_IMAGE_BACKEND:$CI_COMMIT_SHORT_SHA" backend
+    - docker build -f server/Dockerfile -t "$REGISTRY_IMAGE_BACKEND:$CI_COMMIT_SHORT_SHA" backend
     - docker push "$REGISTRY_IMAGE_BACKEND:$CI_COMMIT_SHORT_SHA"
     - |
       if [ "$CI_COMMIT_BRANCH" = "main" ]; then
@@ -104,7 +104,7 @@ docker:build-frontend:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
-    - docker build -f frontend/Dockerfile -t "$REGISTRY_IMAGE_FRONTEND:$CI_COMMIT_SHORT_SHA" frontend
+    - docker build -f client/Dockerfile -t "$REGISTRY_IMAGE_FRONTEND:$CI_COMMIT_SHORT_SHA" frontend
     - docker push "$REGISTRY_IMAGE_FRONTEND:$CI_COMMIT_SHORT_SHA"
     - |
       if [ "$CI_COMMIT_BRANCH" = "main" ]; then
